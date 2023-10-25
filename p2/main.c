@@ -20,9 +20,10 @@ _thread_(void *arg)
 	for (i=0; i<5; ++i) {
 		printf("%s %d\n", name, i);
 		us_sleep(20000);
-		printf("mainYield ");
 		scheduler_yield();
+		printf("main end");
 	}
+	printf("main for");
 }
 
 int
@@ -39,7 +40,7 @@ main(int argc, char *argv[])
 		TRACE(0);
 		return -1;
 	}
-	printf("main ");
+	printf("main\n");
 	scheduler_execute();
 	return 0;
 }
