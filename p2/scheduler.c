@@ -1,10 +1,10 @@
+#undef _FORTIFY_SOURCE
+
 #include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "system.h"
 #include "scheduler.h"
-
-int in = 0;
 
 typedef struct Thread
 {
@@ -24,7 +24,6 @@ typedef struct Thread
     scheduler_fnc_t fnc;
     void *arg;
     struct Thread *next;
-    int threadNum;
 } thread;
 
 struct
@@ -42,8 +41,6 @@ int scheduler_create(scheduler_fnc_t fnc, void *arg)
     {
         return -1;
     }
-    new_thread->threadNum = in;
-    in++;
 
     new_thread->status = STATUS_;
     new_thread->arg = arg;
@@ -71,47 +68,54 @@ int scheduler_create(scheduler_fnc_t fnc, void *arg)
 
 static void destroy()
 {
-    thread *head = state.head_thread;
-    while (state.current_thread != NULL)
+    thread *head_thread = state.head_thread;
+    thread *destory_thread = head_thread->next;
+    while (destory_thread != head_thread)
     {
-        thread *next = head->next;
-        if (head) {
-            free(head);
+        if (destory_thread->stack.memory_)
+        {
+            free(destory_thread->stack.memory_);
         }
-        if (head->stack.memory) {
-            free(head->stack.memory);
+        if (destory_thread)
+        {
+            free(destory_thread);
         }
-        if (head->stack.memory_ ) {
-           free(head->stack.memory_);
-        }
-
-        head = next;
+        destory_thread = destory_thread->next;
     }
-    head = NULL;
+
+    if (head_thread->stack.memory_)
+    {
+        free(head_thread->stack.memory_);
+    }
+    if (head_thread)
+    {
+        free(head_thread);
+    }
+
+    state.head_thread = NULL;
     state.current_thread = NULL;
 }
 
 static thread *thread_candidate()
 {
     thread *next_thread;
-    thread *cursor; 
+    thread *cursor;
 
     if (!state.current_thread)
     {
-        return state.head_thread; 
+        return state.head_thread;
     }
-   
+
     next_thread = state.current_thread->next;
     cursor = state.current_thread;
 
-    while(next_thread != cursor)
+    while (next_thread != cursor)
     {
-        printf("candidate num:%d",next_thread->threadNum);
         if (next_thread->status == STATUS_ || next_thread->status == STATUS_SLEEPING)
         {
             return next_thread;
         }
-        next_thread = next_thread->next ? next_thread->next : state.head_thread;
+        next_thread = next_thread->next;
     }
     return NULL;
 }
@@ -124,6 +128,7 @@ void schedule()
         return;
     }
     state.current_thread = next_thread;
+
     if (state.current_thread->status == STATUS_)
     {
         uint64_t *rsp = (uint64_t *)state.current_thread->stack.memory;
@@ -134,7 +139,7 @@ void schedule()
         state.current_thread->fnc(state.current_thread->arg);
         state.current_thread->status = STATUS_TERMINATED;
         /*_thread_ process end, it would be back to main process, it would crash, so back to longjump back to main process*/
-        longjmp(state.current_thread->ctx, 1);
+        longjmp(state.ctx, 2);
     }
     else
     {
@@ -145,34 +150,19 @@ void schedule()
 void scheduler_execute()
 {
     int jumpFlag = setjmp(state.ctx);
-    if (jumpFlag == 0)
+
+    if (jumpFlag == 0 || jumpFlag == 1)
     {
         schedule();
-    }else if(jumpFlag == 1){
-        schedule();
-        return;
-    }else if(jumpFlag == 2){
-        printf("destory\n");
-         destroy();
     }
-       
-
-    printf("All threads terminated\n");
+    else if (jumpFlag == 2)
+    {
+        destroy();
+    }
 }
 
 void scheduler_yield()
 {
-    printf("yield\n");
-
-    /* while (state.current_thread != NULL) {
-        printf("%d -> ", state.current_thread->threadNum);
-        state.current_thread = state.current_thread->next;
-        if(state.current_thread->threadNum==4){
-            break;
-        }
-    }
-    printf("\n");
-    printf("end of print\n"); */
     if (setjmp(state.current_thread->ctx) == 0)
     {
         state.current_thread->status = STATUS_SLEEPING;

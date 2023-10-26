@@ -17,13 +17,11 @@ _thread_(void *arg)
 	int i;
 
 	name = (const char *)arg;
-	for (i=0; i<5; ++i) {
+	for (i=0; i<50; ++i) {
 		printf("%s %d\n", name, i);
 		us_sleep(20000);
 		scheduler_yield();
-		printf("main end");
 	}
-	printf("main for");
 }
 
 int
