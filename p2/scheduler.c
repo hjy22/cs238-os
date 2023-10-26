@@ -26,7 +26,7 @@ typedef struct Thread
     struct Thread *next;
 } thread;
 
-struct
+static struct
 {
     thread *head_thread;
     thread *current_thread;
@@ -120,7 +120,7 @@ static thread *thread_candidate()
     return NULL;
 }
 
-void schedule()
+static void schedule()
 {
     thread *next_thread = thread_candidate();
     if (next_thread == NULL)
