@@ -1,3 +1,11 @@
+/**
+ * Tony Givargis
+ * Copyright (C), 2023
+ * University of California, Irvine
+ *
+ * CS 238P - Operating Systems
+ * scheduler.c
+ */
 #undef _FORTIFY_SOURCE
 
 #include <setjmp.h>
@@ -33,6 +41,10 @@ static struct
     jmp_buf ctx;
 } state;
 
+int stack_size = 0;
+int num_threads = 0;
+int terminate_counter = 0;
+
 int scheduler_create(scheduler_fnc_t fnc, void *arg)
 {
     thread *new_thread = (thread *)malloc(sizeof(thread));
@@ -41,20 +53,20 @@ int scheduler_create(scheduler_fnc_t fnc, void *arg)
     {
         return -1;
     }
-
+    num_threads++;
     new_thread->status = STATUS_;
     new_thread->arg = arg;
     new_thread->fnc = fnc;
-    new_thread->next = NULL;
     page = page_size();
+    stack_size = page * 4;
 
-    new_thread->stack.memory_ = malloc(page * 2);
+    new_thread->stack.memory_ = malloc(stack_size + page);
     new_thread->stack.memory = memory_align(new_thread->stack.memory_, page);
 
     if (state.head_thread == NULL)
     {
         state.head_thread = new_thread;
-        new_thread->next = state.head_thread;
+        state.head_thread->next = state.head_thread;
         state.current_thread = state.head_thread;
     }
     else
@@ -66,12 +78,13 @@ int scheduler_create(scheduler_fnc_t fnc, void *arg)
     return 0;
 }
 
-static void destroy()
+static void destroy_all()
 {
-    thread *head_thread = state.head_thread;
-    thread *destory_thread = head_thread->next;
-    while (destory_thread != head_thread)
+    thread *destory_thread = state.current_thread;
+    thread *next_thread;
+    while (num_threads > 0)
     {
+        next_thread = destory_thread->next;
         if (destory_thread->stack.memory_)
         {
             free(destory_thread->stack.memory_);
@@ -80,16 +93,8 @@ static void destroy()
         {
             free(destory_thread);
         }
-        destory_thread = destory_thread->next;
-    }
-
-    if (head_thread->stack.memory_)
-    {
-        free(head_thread->stack.memory_);
-    }
-    if (head_thread)
-    {
-        free(head_thread);
+        destory_thread = next_thread;
+        num_threads--;
     }
 
     state.head_thread = NULL;
@@ -122,24 +127,24 @@ static thread *thread_candidate()
 
 static void schedule()
 {
+    uint64_t rsp;
+
     thread *next_thread = thread_candidate();
-    if (next_thread == NULL)
-    {
-        return;
-    }
+
     state.current_thread = next_thread;
 
     if (state.current_thread->status == STATUS_)
     {
-        uint64_t *rsp = (uint64_t *)state.current_thread->stack.memory;
+
+        rsp = (uint64_t)state.current_thread->stack.memory + (uint64_t)stack_size;
+
         __asm__ volatile("mov %[rs], %%rsp \n"
                          : [rs] "+r"(rsp)::);
 
         state.current_thread->status = STATUS_RUNNING;
         state.current_thread->fnc(state.current_thread->arg);
         state.current_thread->status = STATUS_TERMINATED;
-        /*_thread_ process end, it would be back to main process, it would crash, so back to longjump back to main process*/
-        longjmp(state.ctx, 2);
+        longjmp(state.ctx, 2); /*finished,jump back to schedule_execute()*/
     }
     else
     {
@@ -157,7 +162,18 @@ void scheduler_execute()
     }
     else if (jumpFlag == 2)
     {
-        destroy();
+        terminate_counter++;
+
+        if (terminate_counter < num_threads)
+        {
+            state.current_thread = thread_candidate();
+            longjmp(state.current_thread->ctx, 1);
+        }
+        else if(terminate_counter==num_threads)
+        {
+            destroy_all();
+            return;
+        }
     }
 }
 
