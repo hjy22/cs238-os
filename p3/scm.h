@@ -48,6 +48,13 @@ void scm_close(struct scm *scm);
 void *scm_malloc(struct scm *scm, size_t n);
 
 /**
+ * scm - file descriptor, length, size -  current allocated size, char* memory(start ADDR)
+ * n - size of malloc
+ * 
+ * (check the memory and the length; length>memory, crash)
+ * size = scm.size;
+ * scm.size += n;
+ * return scm->memory+size
  * Analogous to the standard C strdup function, but using SCM region.
  *
  * scm: an opaque handle previously obtained by calling scm_open()
@@ -88,6 +95,7 @@ size_t scm_utilized(const struct scm *scm);
 size_t scm_capacity(const struct scm *scm);
 
 /**
+ * first address
  * Returns the base memory address withn the SCM region, i.e., the memory
  * pointer that would have been returned by the first call to scm_malloc()
  * after a truncated initialization.

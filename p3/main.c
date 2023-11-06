@@ -179,9 +179,9 @@ static void
 usage(const char *name)
 {
 	printf("usage: %s [options] pathname\n\n"
-	       "  -- options --\n"
-	       "    truncate : clear SCM content\n"
-	       "    nocolor  : do not use terminal colors\n"
+	       "  options:\n"
+	       "    --truncate : clear SCM content\n"
+	       "    --nocolor  : do not use terminal colors\n"
 	       "\n",
 	       name);
 }
