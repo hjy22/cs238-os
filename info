@@ -1,0 +1,50 @@
+PROC_MEMINFOMemTotal:        4025076 kB
+PROC_MEMINFOMemFree:         2801644 kB
+PROC_MEMINFOMemAvailable:    3621192 kB
+PROC_MEMINFOBuffers:           85080 kB
+PROC_MEMINFOCached:           887332 kB
+PROC_MEMINFOSwapCached:            0 kB
+PROC_MEMINFOActive:           390948 kB
+PROC_MEMINFOInactive:         656640 kB
+PROC_MEMINFOActive(anon):        324 kB
+PROC_MEMINFOInactive(anon):    75280 kB
+PROC_MEMINFOActive(file):     390624 kB
+PROC_MEMINFOInactive(file):   581360 kB
+PROC_MEMINFOUnevictable:           0 kB
+PROC_MEMINFOMlocked:               0 kB
+PROC_MEMINFOSwapTotal:             0 kB
+PROC_MEMINFOSwapFree:              0 kB
+PROC_MEMINFODirty:              1380 kB
+PROC_MEMINFOWriteback:             0 kB
+PROC_MEMINFOAnonPages:         70384 kB
+PROC_MEMINFOMapped:            81504 kB
+PROC_MEMINFOShmem:               428 kB
+PROC_MEMINFOKReclaimable:     105260 kB
+PROC_MEMINFOSlab:             131240 kB
+PROC_MEMINFOSReclaimable:     105260 kB
+PROC_MEMINFOSUnreclaim:        25980 kB
+PROC_MEMINFOKernelStack:        1840 kB
+PROC_MEMINFOPageTables:         2056 kB
+PROC_MEMINFONFS_Unstable:          0 kB
+PROC_MEMINFOBounce:                0 kB
+PROC_MEMINFOWritebackTmp:          0 kB
+PROC_MEMINFOCommitLimit:     2012536 kB
+PROC_MEMINFOCommitted_AS:     312864 kB
+PROC_MEMINFOVmallocTotal:   34359738367 kB
+PROC_MEMINFOVmallocUsed:        7416 kB
+PROC_MEMINFOVmallocChunk:          0 kB
+PROC_MEMINFOPercpu:             1688 kB
+PROC_MEMINFOAnonHugePages:     24576 kB
+PROC_MEMINFOShmemHugePages:        0 kB
+PROC_MEMINFOShmemPmdMapped:        0 kB
+PROC_MEMINFOFileHugePages:         0 kB
+PROC_MEMINFOFilePmdMapped:         0 kB
+PROC_MEMINFOHugePages_Total:       0
+PROC_MEMINFOHugePages_Free:        0
+PROC_MEMINFOHugePages_Rsvd:        0
+PROC_MEMINFOHugePages_Surp:        0
+PROC_MEMINFOHugepagesize:       2048 kB
+PROC_MEMINFOHugetlb:               0 kB
+PROC_MEMINFODirectMap4k:      109368 kB
+PROC_MEMINFODirectMap2M:     3033088 kB
+PROC_MEMINFODirectMap1G:     3145728 kB
